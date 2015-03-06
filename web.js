@@ -6,6 +6,7 @@ var express = require('express');
 var NodoConectorHttpServer = Vortex.NodoConectorHttpServer;
 var NodoRouter = Vortex.NodoRouter;
 var NodoConectorSocket = Vortex.NodoConectorSocket;
+var Vx = Vortex.Vx;
 
 var pad = function (n, width, z) {
   z = z || '0';
@@ -17,7 +18,9 @@ var sesiones_http = [];
 var sesiones_web_socket = [];
 var ultimo_id_sesion_http = 0;
 var ultimo_id_sesion_ws = 0;
-var router = new NodoRouter("principal");
+
+Vx.start({verbose:true});
+var router = Vx.router; // new NodoRouter("principal");
 
 var allowCrossDomain = function(req, res, next) {
     res.header('Access-Control-Allow-Origin', "*");
@@ -84,3 +87,18 @@ server.listen(puerto);
 
 
 console.log('Arrancó la cosa en ' + puerto);
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+//Acá arranca el backend de some, después lo sacamos para otro lado
+
+Vx.when({
+    tipoDeMensaje: 'medicionCruda'
+}, function(medicion_cruda){
+    Vx.send({
+        tipoDeMensaje: 'medicionAislada',
+        idInstrumento: 111,
+        valorMedicion: parseFloat(medicion_cruda.valorMedicion),
+        unidad:'cm'        
+    });
+});
