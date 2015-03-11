@@ -90,15 +90,26 @@ console.log('Arrancó la cosa en ' + puerto);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//Acá arranca el backend de some, después lo sacamos para otro lado
+//Acá arranca el backend de sime, después lo sacamos para otro lado
 
-Vx.when({
-    tipoDeMensaje: 'medicionCruda'
-}, function(medicion_cruda){
-    Vx.send({
-        tipoDeMensaje: 'medicionAislada',
-        idInstrumento: 111,
-        valorMedicion: parseFloat(medicion_cruda.valorMedicion),
-        unidad:'cm'        
-    });
+var mongodb = require('mongodb');
+var uri = 'mongodb://admin:haciendo@ds033599.mongolab.com:33599/sime-backend';
+
+mongodb.MongoClient.connect(uri, function(err, db) {  
+  	if(err) throw err;
+	var medicionesCrudas = db.collection('medicionesCrudas');
+	Vx.when({
+		tipoDeMensaje: 'medicionCruda'
+	}, function(medicion_cruda){
+		medicionesCrudas.insert(medicion_cruda, function(err, result) {
+		});
+		Vx.send({
+			tipoDeMensaje: 'medicionAislada',
+			idInstrumento: 111,
+			valorMedicion: parseFloat(medicion_cruda.valorMedicion),
+			unidad:'cm'        
+		});
+	});
+	
 });
+
