@@ -97,12 +97,13 @@ var uri = 'mongodb://admin:haciendo@ds033599.mongolab.com:33599/sime-backend';
 
 mongodb.MongoClient.connect(uri, function(err, db) {  
   	if(err) throw err;
-	var medicionesCrudas = db.collection('medicionesCrudas');
+	var col_usuarios = db.collection('usuarios');
+	var col_piezas = db.collection('piezas');
+	var col_cotas = db.collection('cotas');
+	
 	Vx.when({
 		tipoDeMensaje: 'medicionCruda'
 	}, function(medicion_cruda){
-		medicionesCrudas.insert(medicion_cruda, function(err, result) {
-		});
 		Vx.send({
 			tipoDeMensaje: 'medicionAislada',
 			idInstrumento: 111,
@@ -111,5 +112,50 @@ mongodb.MongoClient.connect(uri, function(err, db) {
 		});
 	});
 	
+	Vx.when({ 
+		tipoDeMensaje: 'usuarioLogin'
+	}, function(login_msg){
+		col_usuarios.find({id:login_msg.idUsuario}).toArray(function(err, usuarios){
+			if(usuarios.length>0){
+				Vx.send({
+					responseTo: login_msg.idRequest,
+					tipoDeMensaje: 'usuarioLogin.respuesta',
+					usuarioValido: true,
+					usuario: usuarios[0]
+				});
+			} else{
+				Vx.send({
+					responseTo: login_msg.idRequest,
+					tipoDeMensaje: 'usuarioLogin.respuesta',
+					usuarioValido: false
+				});
+			}
+		});
+	});
+	
+	Vx.when({ 
+		tipoDeMensaje: 'buscarPiezas'
+	}, function(busq_piezas){
+		col_piezas.find({}).toArray(function(err, piezas){
+			Vx.send({
+				responseTo: busq_piezas.idRequest,
+				tipoDeMensaje: 'buscarPiezas.respuesta',
+				piezas: piezas
+			});
+		});
+	});
+	
+	
+	Vx.when({ 
+		tipoDeMensaje: 'buscarCotas'
+	}, function(busq_cotas){
+		col_cotas.find({idPieza:busq_cotas.idPieza}).toArray(function(err, cotas){
+			Vx.send({
+				responseTo: busq_cotas.idRequest,
+				tipoDeMensaje: 'buscarCotas.respuesta',
+				cotas: cotas
+			});
+		});
+	});
 });
 
