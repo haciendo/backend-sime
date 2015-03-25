@@ -9,9 +9,9 @@ var uri = 'mongodb://admin:haciendo@ds033599.mongolab.com:33599/sime-backend';
 mongodb.MongoClient.connect(uri, function(err, db) {  
   	if(err) throw err;
 	var col_usuarios = db.collection('usuarios');
-	var col_piezas = db.collection('piezas');
+	var col_piezas = db.collection('tipoPiezas');
 	var col_cotas = db.collection('cotas');
-	
+		
 	Vx.when({
 		tipoDeMensaje: 'medicionCruda'
 	}, function(medicion_cruda){
@@ -26,13 +26,15 @@ mongodb.MongoClient.connect(uri, function(err, db) {
 	Vx.when({ 
 		tipoDeMensaje: 'usuarioLogin'
 	}, function(login_msg){
-		col_usuarios.find({id:login_msg.idUsuario}).toArray(function(err, usuarios){
+		col_usuarios.find({id:login_msg.clavePublica}).toArray(function(err, usuarios){
 			if(usuarios.length>0){
+				var usuario = usuarios[0];
 				Vx.send({
 					tipoDeMensaje: "Vortex.respuesta",
                     responseTo: login_msg.idRequest,
 					usuarioValido: true,
-					usuario: usuarios[0]
+					idUsuario: usuario._id,
+					instrumentos: []
 				});
 			} else{
 				Vx.send({
@@ -45,13 +47,13 @@ mongodb.MongoClient.connect(uri, function(err, db) {
 	});
 	
 	Vx.when({ 
-		tipoDeMensaje: 'buscarPiezas'
+		tipoDeMensaje: 'buscarTipoPiezas'
 	}, function(busq_piezas){
 		col_piezas.find({}).toArray(function(err, piezas){
 			Vx.send({
 				tipoDeMensaje: "Vortex.respuesta",
 				responseTo: busq_piezas.idRequest,
-				piezas: piezas
+				tipoPiezas: piezas
 			});
 		});
 	});
@@ -60,7 +62,7 @@ mongodb.MongoClient.connect(uri, function(err, db) {
 	Vx.when({ 
 		tipoDeMensaje: 'buscarCotas'
 	}, function(busq_cotas){
-		col_cotas.find({idPieza:busq_cotas.idPieza}).toArray(function(err, cotas){
+		col_cotas.find({idTipoPieza:busq_cotas.idTipoPieza}).toArray(function(err, cotas){
 			Vx.send({
 				tipoDeMensaje: "Vortex.respuesta",
                 responseTo: busq_cotas.idRequest,
