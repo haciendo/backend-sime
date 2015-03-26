@@ -35,7 +35,17 @@ mongodb.MongoClient.connect(uri, function(err, db) {
                     responseTo: login_msg.idRequest,
 					usuarioValido: true,
 					idUsuario: usuario._id,
-					instrumentos: []
+					instrumentos: [{   
+							idInstrumento: "ascdvkamoc",
+							descripcion: "Calibre Mitutoyo",
+							precision: 0.05,
+							unidad: "cm"
+						},{   
+							idInstrumento: "cvsdvsdvnd",
+							descripcion: "Micrometro digimess",
+							precision: 0.005,
+							unidad: "mm"
+						}]
 				});
 			} else{
 				Vx.send({
