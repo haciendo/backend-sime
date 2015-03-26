@@ -27,7 +27,7 @@ mongodb.MongoClient.connect(uri, function(err, db) {
 	Vx.when({ 
 		tipoDeMensaje: 'usuarioLogin'
 	}, function(login_msg){
-		col_usuarios.find({id:login_msg.clavePublica}).toArray(function(err, usuarios){
+		col_usuarios.find({clavePublica:login_msg.clavePublica}).toArray(function(err, usuarios){
 			if(usuarios.length>0){
 				var usuario = usuarios[0];
 				Vx.send({
