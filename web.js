@@ -26,13 +26,11 @@ mongodb.MongoClient.connect(uri, function(err, db) {
 	
 	Vx.when({ 
 		tipoDeMensaje: 'usuarioLogin'
-	}, function(login_msg){
+	}, function(login_msg, response){
 		col_usuarios.find({clavePublica:login_msg.clavePublica}).toArray(function(err, usuarios){
 			if(usuarios.length>0){
 				var usuario = usuarios[0];
-				Vx.send({
-					tipoDeMensaje: "Vortex.respuesta",
-                    responseTo: login_msg.idRequest,
+				response.send({
 					usuarioValido: true,
 					idUsuario: usuario._id,
 					instrumentos: [{   
@@ -48,9 +46,7 @@ mongodb.MongoClient.connect(uri, function(err, db) {
 						}]
 				});
 			} else{
-				Vx.send({
-					tipoDeMensaje: "Vortex.respuesta",
-                    responseTo: login_msg.idRequest,
+				response.send({
 					usuarioValido: false
 				});
 			}
@@ -59,16 +55,14 @@ mongodb.MongoClient.connect(uri, function(err, db) {
 	
 	Vx.when({ 
 		tipoDeMensaje: 'buscarTipoPiezas'
-	}, function(busq_piezas){
+	}, function(busq_piezas, response){
 		col_piezas.find({}).toArray(function(err, piezas){
 			piezas = _.map(piezas, function(pieza){ 
 				pieza["idTipoPieza"] = pieza["_id"];
         		delete pieza["_id"];
 				return pieza;
 			});
-			Vx.send({
-				tipoDeMensaje: "Vortex.respuesta",
-				responseTo: busq_piezas.idRequest,
+			response.send({
 				tipoPiezas: piezas
 			});
 		});
@@ -77,16 +71,14 @@ mongodb.MongoClient.connect(uri, function(err, db) {
 	
 	Vx.when({ 
 		tipoDeMensaje: 'buscarCotas'
-	}, function(busq_cotas){
+	}, function(busq_cotas, response){
 		col_cotas.find({idTipoPieza:busq_cotas.idTipoPieza}).toArray(function(err, cotas){
 			cotas = _.map(cotas, function(cota){ 
 				cota["idCota"] = cota["_id"];
 				delete cota["_id"];
 				return cota;
 			});
-			Vx.send({
-				tipoDeMensaje: "Vortex.respuesta",
-                responseTo: busq_cotas.idRequest,
+			response.send({
 				cotas: cotas
 			});
 		});

@@ -36,13 +36,10 @@
 			//Vx.conectarCon(new NodoConectorSocket('https://server-vortex.herokuapp.com'));
 			Vx.conectarCon(new NodoConectorSocket('http://localhost:3000'));
 			
-            Vx.when({contenido:'prueba'}, function (mensaje) {
+            Vx.when({contenido:'prueba'}, function (mensaje, response) {
 				mensajes_recibidos += 1;
 				div_contador.text(mensajes_recibidos.toString());
-                Vx.send({
-                    tipoDeMensaje: "Vortex.respuesta",
-                    responseTo: mensaje.idRequest
-                });
+				response.send({bla:"bla"});
 			});        
         });
     </script>
