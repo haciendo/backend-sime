@@ -77,6 +77,7 @@ mongodb.MongoClient.connect(uri, function(err, db) {
 				cota["idCota"] = cota["_id"];
 				delete cota["_id"];
 				return cota;
+				
 			});
 			response.send({
 				cotas: cotas
