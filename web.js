@@ -18,9 +18,8 @@ mongodb.MongoClient.connect(uri, function(err, db) {
 	}, function(medicion_cruda){
 		Vx.send({
 			tipoDeMensaje: 'medicionAislada',
-			idInstrumento: 111,
-			valorMedicion: parseFloat(medicion_cruda.valorMedicion),
-			unidad:'cm'        
+			idInstrumento: "ascdvkamoc",
+			valorMedicion: parseFloat(medicion_cruda.valorMedicion)    
 		});
 	});
 	
