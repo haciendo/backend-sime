@@ -72,5 +72,21 @@ mongodb.MongoClient.connect(uri, function(err, db) {
 			});
 		});
 	});
+	
+	Vx.when({ 
+		tipoDeMensaje: 'newPieza'
+	}, function(msg, response){
+		col_piezas.save({
+			idTipoDePieza: msg.idTipoDePieza,
+			mediciones: _.map(msg.mediciones, function(medicion){
+				medicion.idUsuarioMedidor = msg.idUsuario;
+				return medicion;
+			})
+		}, function(err){
+			response.send({
+				resultado: "ok"
+			});
+		});
+	});
 });
 
