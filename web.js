@@ -19,10 +19,10 @@ mongodb.MongoClient.connect(uri, function(err, db) {
 	Vx.when({
 		tipoDeMensaje: 'medicionCruda'
 	}, function(medicion_cruda){
-        col_adaptadores.find({codigo: medicion_cruda.codigoAdaptador}).toArray(function(adaptadores){
+        col_adaptadores.find({codigo: medicion_cruda.codigoAdaptador}).toArray(function(err, adaptadores){
             if(adaptadores.length == 0) return;
             var adaptador = adaptadores[0];
-            col_instrumentos.find({idAdaptador: adaptador._id.toString()}).toArray(function(instrumentos){
+            col_instrumentos.find({idAdaptador: adaptador._id.toString()}).toArray(function(err, instrumentos){
                 if(instrumentos.length == 0) return;
                 var instrumento = instrumentos[0];
                 Vx.send({
