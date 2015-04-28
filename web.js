@@ -8,6 +8,9 @@ var mongodb = require('mongodb');
 //var uri = 'mongodb://127.0.0.1/Sime';
 var uri = 'mongodb://admin:haciendo@ds033599.mongolab.com:33599/sime-backend';
 
+var ObjectId = mongodb.ObjectID;
+
+
 mongodb.MongoClient.connect(uri, function(err, db) {  
   	if(err) throw err;
 	var col_usuarios = db.collection('usuarios');
@@ -83,10 +86,50 @@ mongodb.MongoClient.connect(uri, function(err, db) {
 				return medicion;
 			})
 		}, function(err){
+			var resultado = "ok";
+			if(err) throw resultado = "error al agregar";
 			response.send({
-				resultado: "ok"
-			});
+				resultado: resultado
+			});	
 		});
 	});
+	
+	Vx.when({ 
+		tipoDeMensaje: 'updatePieza'
+	}, function(msg, response){
+		col_piezas.find({_id: new ObjectId(msg.idPieza)}).toArray(function(err, piezas){
+			if(piezas.length == 0) return;
+			var pieza = piezas[0];
+			pieza.mediciones = _.union(pieza.mediciones, _.map(msg.mediciones, function(m){
+				m.idUsuarioMedidor = msg.idUsuario;
+				return m;
+			}));
+
+			col_piezas.save(pieza, function(err){
+				var resultado = "ok";
+				if(err) throw resultado = "error al agregar";
+				response.send({
+					resultado: resultado
+				});	
+			});
+		});	
+	});
+	
+	app.post('/incluirPostulanteAPerfilEnExpediente', function(request, response){
+		var dni_postulante = request.body.dniPostulante;
+		var id_perfil = request.body.idPerfil;
+		var id_expediente= request.body.idExpediente;
+		
+		var col_perfiles = db.collection('perfiles');
+		col_perfiles.find({_id: new ObjectId(id_perfil)}).toArray(function(err, perfiles){
+			var perfil = perfiles[0];
+			_.findWhere(perfil.postulantes, {dni:dni_postulante}).incluidoEnExpediente = id_expediente;
+			col_perfiles.save(perfil, function(err){
+				if(err) throw err;
+				response.send("ok");	
+			});
+		});	
+	});
+	
 });
 
