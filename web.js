@@ -12,17 +12,26 @@ mongodb.MongoClient.connect(uri, function(err, db) {
   	if(err) throw err;
 	var col_usuarios = db.collection('usuarios');
 	var col_instrumentos = db.collection('instrumentos');
+	var col_adaptadores = db.collection('adaptadores');
 	var col_tipos_de_pieza = db.collection('tiposDePieza');
 	var col_piezas = db.collection('piezas');
 		
 	Vx.when({
 		tipoDeMensaje: 'medicionCruda'
 	}, function(medicion_cruda){
-		Vx.send({
-			tipoDeMensaje: 'medicionAislada',
-			idInstrumento: "ascdvkamoc",
-			valorMedicion: parseFloat(medicion_cruda.valorMedicion)    
-		});
+        col_adaptadores.find({codigo: medicion_cruda.codigoAdaptador}).toArray(function(adaptadores){
+            if(adaptadores.length == 0) return;
+            var adaptador = adaptadores[0];
+            col_instrumentos.find({idAdaptador: adaptador._id.toString()}).toArray(function(instrumentos){
+                if(instrumentos.length == 0) return;
+                var instrumento = instrumentos[0];
+                Vx.send({
+                    tipoDeMensaje: 'medicionAislada',
+                    idInstrumento: instrumento._id,
+                    valorMedicion: parseFloat(medicion_cruda.valorCrudo)    
+                });
+            });
+        });		
 	});
 	
 	Vx.when({ 
