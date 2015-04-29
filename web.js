@@ -5,12 +5,19 @@ var server_vortex = new Vortex.ServerVortex();
 
 var _ = require("./underscore-min");
 var mongodb = require('mongodb');
-//var uri = 'mongodb://127.0.0.1/Sime';
-var uri = 'mongodb://admin:haciendo@ds033599.mongolab.com:33599/sime-backend';
 
 var ObjectId = mongodb.ObjectID;
 
+process.on('uncaughtException', function (err) {
+  	console.log('Tiró error: ', err.toString());
+	Vx.send({
+		tipoDeMensaje: "vortex.debug.error",
+		error: err.toString()
+	});
+});
 
+//var uri = 'mongodb://127.0.0.1/Sime';
+var uri = 'mongodb://admin:haciendo@ds033599.mongolab.com:33599/sime-backend';
 mongodb.MongoClient.connect(uri, function(err, db) {  
   	if(err) throw err;
 	var col_usuarios = db.collection('usuarios');
@@ -40,9 +47,8 @@ mongodb.MongoClient.connect(uri, function(err, db) {
 	Vx.when({ 
 		tipoDeMensaje: 'usuarioLogin'
 	}, function(login_msg, response){		
-		col_usuarios.find({clavePublica:login_msg.clavePublica}).toArray(function(err, usuarios){			
-			if(usuarios.length>0){
-				var usuario = usuarios[0];
+		col_usuarios.findOne({clavePublica:login_msg.clavePublica}, function(err, usuario){			
+			if(usuario){
 				col_instrumentos.find({idUsuarioOwner: usuario._id.toString()}).toArray(function(err, instrumentos){
 					response.send({
 						usuarioValido: true,
@@ -104,14 +110,13 @@ mongodb.MongoClient.connect(uri, function(err, db) {
 	Vx.when({ 
 		tipoDeMensaje: 'updatePieza'
 	}, function(msg, response){
-		col_piezas.find({_id: new ObjectId(msg.pieza.idPieza)}).toArray(function(err, piezas){
-			if(piezas.length == 0) {
+		col_piezas.findOne({_id: new ObjectId(msg.pieza.idPieza)}, function(err, pieza){
+			if(!pieza) {
 				response.send({
 					resultado: "pieza no encontrada"
 				});	
 				return;
 			}
-			var pieza = piezas[0];
 			pieza.mediciones = _.union(pieza.mediciones, _.map(msg.pieza.mediciones, function(m){
 				m.idUsuarioMedidor = msg.idUsuario;
 				return m;
@@ -126,6 +131,5 @@ mongodb.MongoClient.connect(uri, function(err, db) {
 			});
 		});	
 	});
-	
 });
 
