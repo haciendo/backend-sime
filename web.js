@@ -79,17 +79,24 @@ mongodb.MongoClient.connect(uri, function(err, db) {
 	Vx.when({ 
 		tipoDeMensaje: 'newPieza'
 	}, function(msg, response){
-		col_piezas.save({
-			idTipoDePieza: msg.idTipoDePieza,
-			mediciones: _.map(msg.mediciones, function(medicion){
-				medicion.idUsuarioMedidor = msg.idUsuario;
-				return medicion;
-			})
-		}, function(err){
-			var resultado = "ok";
-			if(err) throw resultado = "error al agregar";
+		msg.pieza.mediciones = _.map(msg.pieza.mediciones, function(medicion){
+			medicion.idUsuarioMedidor = msg.idUsuario;
+			return medicion;
+		});
+		
+		col_piezas.save(msg.pieza, function(err, pieza){
+			if(err) {
+				response.send({
+					resultado: "error al agregar"
+				});
+				return;
+			}	
 			response.send({
-				resultado: resultado
+				resultado: "ok",
+				pieza:{
+					idPieza: pieza._id,
+					descripcion: "descripción mockeada, el id está bien"
+				}
 			});	
 		});
 	});
@@ -97,10 +104,15 @@ mongodb.MongoClient.connect(uri, function(err, db) {
 	Vx.when({ 
 		tipoDeMensaje: 'updatePieza'
 	}, function(msg, response){
-		col_piezas.find({_id: new ObjectId(msg.idPieza)}).toArray(function(err, piezas){
-			if(piezas.length == 0) return;
+		col_piezas.find({_id: new ObjectId(msg.pieza.idPieza)}).toArray(function(err, piezas){
+			if(piezas.length == 0) {
+				response.send({
+					resultado: "pieza no encontrada"
+				});	
+				return;
+			}
 			var pieza = piezas[0];
-			pieza.mediciones = _.union(pieza.mediciones, _.map(msg.mediciones, function(m){
+			pieza.mediciones = _.union(pieza.mediciones, _.map(msg.pieza.mediciones, function(m){
 				m.idUsuarioMedidor = msg.idUsuario;
 				return m;
 			}));
@@ -111,22 +123,6 @@ mongodb.MongoClient.connect(uri, function(err, db) {
 				response.send({
 					resultado: resultado
 				});	
-			});
-		});	
-	});
-	
-	app.post('/incluirPostulanteAPerfilEnExpediente', function(request, response){
-		var dni_postulante = request.body.dniPostulante;
-		var id_perfil = request.body.idPerfil;
-		var id_expediente= request.body.idExpediente;
-		
-		var col_perfiles = db.collection('perfiles');
-		col_perfiles.find({_id: new ObjectId(id_perfil)}).toArray(function(err, perfiles){
-			var perfil = perfiles[0];
-			_.findWhere(perfil.postulantes, {dni:dni_postulante}).incluidoEnExpediente = id_expediente;
-			col_perfiles.save(perfil, function(err){
-				if(err) throw err;
-				response.send("ok");	
 			});
 		});	
 	});
