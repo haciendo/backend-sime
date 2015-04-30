@@ -56,7 +56,13 @@ mongodb.MongoClient.connect(uri, function(err, db) {
 						nombre: usuario.nombre,
 						nombreUsuario: usuario.nombreUsuario,
 						idUsuario: usuario._id,
-						instrumentos: instrumentos						
+						instrumentos: _.map(instrumentos, function(inst){
+							inst.idInstrumento = inst._id;
+        					delete inst._id;
+        					delete inst.idAdaptador;
+        					delete inst.idUsuarioOwner;
+							return inst;
+						})						
 					});
 				});
 			} else{
