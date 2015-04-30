@@ -78,8 +78,8 @@ mongodb.MongoClient.connect(uri, function(err, db) {
 	}, function(busq_piezas, response){
 		col_tipos_de_pieza.find({ descripcion: new RegExp(busq_piezas.textoBusqueda)}).toArray(function(err, tipos_de_pieza){
 			tipos_de_pieza = _.map(tipos_de_pieza, function(tipo_de_pieza){ 
-				tipo_de_pieza["idTipoDePieza"] = tipo_de_pieza["_id"];
-        		delete tipo_de_pieza["_id"];
+				tipo_de_pieza.idTipoDePieza = tipo_de_pieza._id;
+        		delete tipo_de_pieza._id;
 				return tipo_de_pieza;
 			});
 			response.send({
