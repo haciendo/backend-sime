@@ -18,8 +18,8 @@ process.on('uncaughtException', function (err) {
 	});
 });
 
-var uri = 'mongodb://127.0.0.1/Sime';
-//var uri = 'mongodb://admin:haciendo@ds033599.mongolab.com:33599/sime-backend';
+//var uri = 'mongodb://127.0.0.1/Sime';
+var uri = 'mongodb://admin:haciendo@ds033599.mongolab.com:33599/sime-backend';
 mongodb.MongoClient.connect(uri, function(err, db) {  
   	if(err) throw err;
 	var col_usuarios = db.collection('usuarios');
