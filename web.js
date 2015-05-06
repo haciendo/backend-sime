@@ -1,6 +1,8 @@
 var Vortex = require('vortexjs');
 var Vx = Vortex.Vx;
 
+Vx.verbose = true;
+
 var server_vortex = new Vortex.ServerVortex();
 
 var _ = require("./underscore-min");
@@ -16,8 +18,8 @@ process.on('uncaughtException', function (err) {
 	});
 });
 
-//var uri = 'mongodb://127.0.0.1/Sime';
-var uri = 'mongodb://admin:haciendo@ds033599.mongolab.com:33599/sime-backend';
+var uri = 'mongodb://127.0.0.1/Sime';
+//var uri = 'mongodb://admin:haciendo@ds033599.mongolab.com:33599/sime-backend';
 mongodb.MongoClient.connect(uri, function(err, db) {  
   	if(err) throw err;
 	var col_usuarios = db.collection('usuarios');
@@ -37,7 +39,7 @@ mongodb.MongoClient.connect(uri, function(err, db) {
                 var instrumento = instrumentos[0];
                 Vx.send({
                     tipoDeMensaje: 'medicionAislada',
-                    idInstrumento: instrumento._id,
+                    idInstrumento: instrumento._id.toString(),
                     valorMedicion: parseFloat(medicion_cruda.valorCrudo)    
                 });
             });
@@ -57,7 +59,7 @@ mongodb.MongoClient.connect(uri, function(err, db) {
 						nombreUsuario: usuario.nombreUsuario,
 						idUsuario: usuario._id,
 						instrumentos: _.map(instrumentos, function(inst){
-							inst.idInstrumento = inst._id;
+							inst.idInstrumento = inst._id.toString();
         					delete inst._id;
         					delete inst.idAdaptador;
         					delete inst.idUsuarioOwner;
@@ -78,7 +80,7 @@ mongodb.MongoClient.connect(uri, function(err, db) {
 	}, function(busq_piezas, response){
 		col_tipos_de_pieza.find({ descripcion: new RegExp(busq_piezas.textoBusqueda)}).toArray(function(err, tipos_de_pieza){
 			tipos_de_pieza = _.map(tipos_de_pieza, function(tipo_de_pieza){ 
-				tipo_de_pieza.idTipoDePieza = tipo_de_pieza._id;
+				tipo_de_pieza.idTipoDePieza = tipo_de_pieza._id.toString();
         		delete tipo_de_pieza._id;
 				return tipo_de_pieza;
 			});
@@ -106,7 +108,7 @@ mongodb.MongoClient.connect(uri, function(err, db) {
 			response.send({
 				resultado: "ok",
 				pieza:{
-					idPieza: pieza._id,
+					idPieza: pieza._id.toString(),
 					descripcion: "descripción mockeada, el id está bien"
 				}
 			});	
